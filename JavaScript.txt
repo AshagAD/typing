@@ -1,0 +1,70 @@
+// script.js
+const textToType = document.getElementById('text-to-type');
+const userInput = document.getElementById('user-input');
+const startButton = document.getElementById('start-button');
+const resultDiv = document.getElementById('result');
+const resultTableBody = document.querySelector('#result-table tbody');
+
+const rows = [
+    "asdfghjkl", // صف الارتكاز
+    "zxcvbnm",   // الصف السفلي
+    "qwertyuiop",   // الصف العلوي
+    "1234567890"     // الأرقام
+];
+
+let currentIndex = 0;
+let startTime;
+let correctAnswers = 0;
+let totalAnswers = 0;
+
+startButton.addEventListener('click', startTest);
+
+function startTest() {
+    currentIndex = 0;
+    correctAnswers = 0;
+    totalAnswers = 0;
+    displayNextRow();
+    startTime = new Date().getTime();
+    startButton.disabled = true;
+    userInput.value = '';
+    userInput.focus();
+}
+
+function displayNextRow() {
+    if (currentIndex < rows.length) {
+        textToType.textContent = rows[currentIndex];
+        currentIndex++;
+    } else {
+        endTest();
+    }
+}
+
+userInput.addEventListener('input', checkInput);
+
+function checkInput() {
+    totalAnswers++;
+    if (userInput.value === textToType.textContent) {
+        correctAnswers++;
+        displayNextRow();
+        userInput.value = '';
+    }
+}
+
+function endTest() {
+    const endTime = new Date().getTime();
+    const elapsedTime = (endTime - startTime) / 1000; // بالثواني
+    const wordsPerMinute = calculateWPM(elapsedTime);
+    const accuracy = (correctAnswers / totalAnswers) * 100;
+    const newRow = resultTableBody.insertRow();
+    newRow.innerHTML = `
+        <td>اسم المتدرب</td>
+        <td>${wordsPerMinute} كلمة في الدقيقة</td>
+        <td>${accuracy.toFixed(2)}%</td>
+    `;
+    startButton.disabled = false;
+}
+
+function calculateWPM(time) {
+    const words = rows.join('').length / 5; // متوسط طول الكلمة 5 أحرف
+    return Math.round((words / time) * 60);
+}
